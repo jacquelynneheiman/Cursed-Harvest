@@ -71,21 +71,7 @@ void UAC_PlayerInteraction::CheckForValidPlantSpot(AMainCharacter* mainChar)
 	// Get player location and rotation
 	mainCharacter = Cast<AMainCharacter>(mainChar);
 	mainCharacter->GetController()->GetPlayerViewPoint(Loc, Rot);
-	//FVector Start = Loc;
-	//FVector End = Start + (Rot.Vector() * TraceDistance);
-
-	// Line trace
-	/*FCollisionQueryParams TraceParams;
-	bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, TraceParams);*/
-
-	/*if (bDrawPlantingDebugLine)
-	{
-		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 3.0f);
-	}*/
-
-	// Did hit anything?  
-	/*if (bHit)
-	{*/
+	
 
 	bool bPlantLoc;
 	FHitResult HitResult;
