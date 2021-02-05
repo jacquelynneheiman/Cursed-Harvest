@@ -45,8 +45,7 @@ public:
 		TSubclassOf<class ACropPickupItem> CropPickupBlueprint;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Pickup")
-		class ACropPickupItem* PickupItem;
-	  
+		class ACropPickupItem* PickupItem;	  
 
 	UPROPERTY(BlueprintReadOnly, Category = "Interaction")
 		bool bPlantIsOverlapped;
@@ -58,8 +57,7 @@ public:
 		float TraceDistance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-		bool bDrawPlantingDebugLine;
-			
+		bool bDrawPlantingDebugLine;			
 
 	UPROPERTY()
 	AMainCharacter* mainCharacter;

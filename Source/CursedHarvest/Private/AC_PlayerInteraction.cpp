@@ -48,6 +48,7 @@ void UAC_PlayerInteraction::DisplayCropTypeUponPickup(TEnumAsByte<ECropType> pic
 // Called from PlantItem
 void UAC_PlayerInteraction::SetPlantOverlapStatus(APlantItem* plantActor, bool overlapStatus)
 {
+	// TODO: This is redundant, see if the if/else can be removed
 	if (plantActor)
 	{
 		OverlappedPlantActor = plantActor;
@@ -63,15 +64,13 @@ void UAC_PlayerInteraction::SetPlantOverlapStatus(APlantItem* plantActor, bool o
 }
 
 void UAC_PlayerInteraction::CheckForValidPlantSpot(AMainCharacter* mainChar)
-{
-	
+{	
 	FVector Loc;
 	FRotator Rot;
 	//FHitResult Hit;
 	// Get player location and rotation
 	mainCharacter = Cast<AMainCharacter>(mainChar);
-	mainCharacter->GetController()->GetPlayerViewPoint(Loc, Rot);
-	
+	mainCharacter->GetController()->GetPlayerViewPoint(Loc, Rot);	
 
 	bool bPlantLoc;
 	FHitResult HitResult;
@@ -91,32 +90,22 @@ void UAC_PlayerInteraction::CheckForValidPlantSpot(AMainCharacter* mainChar)
 		if (GroundLoc + GroundVariationAllowance > HitResult.ImpactPoint.Z && GroundLoc - GroundVariationAllowance < HitResult.ImpactPoint.Z)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Can plant on this surface."));
-			FVector_NetQuantize PlantLoc;
-			//PlantLoc = Hit.ImpactPoint;
-
-			// TEST
+			FVector_NetQuantize PlantLoc;			
 			
-				UE_LOG(LogTemp, Warning, TEXT("Hit location = %s"), *HitResult.ImpactPoint.ToString());
-				PlantLoc = HitResult.ImpactPoint;
-				CheckCanPlant(PlantLoc, Rot);
-				// TODO: Remove below for prod
-				DrawDebugBox(GetWorld(), HitResult.ImpactPoint, FVector(25, 25, 25), FColor::Emerald, false, 3.f);
-			 
-			// END TEST
-
-			// See if player meets requirements to plant a seed
-			//CheckCanPlant(PlantLoc, Rot); 
+			UE_LOG(LogTemp, Warning, TEXT("Hit location = %s"), *HitResult.ImpactPoint.ToString());
+			PlantLoc = HitResult.ImpactPoint;
+			CheckCanPlant(PlantLoc, Rot);
+			// TODO: Remove below for prod
+			DrawDebugBox(GetWorld(), HitResult.ImpactPoint, FVector(25, 25, 25), FColor::Emerald, false, 3.f);			  
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("CAN'T PLANT HERE"));
-		}
-		//UE_LOG(LogTemp, Warning, TEXT("Ground location Z(height): %f"), GroundLoc);
-	//}
+		}		 
 	}
 }
 
-// Gets the ground location at X,Y - Used for Determining the location to plant a seed
+// Gets the ground (Z) location at X,Y - Used for Determining the location to plant a seed
 float UAC_PlayerInteraction::GetSurface(FVector2D Point, bool bDrawDebugLines)
 {
 	UWorld* World{ this->GetWorld() };
@@ -242,44 +231,39 @@ void UAC_PlayerInteraction::SpawnPickupItems(AMainCharacter* mainChar, ECropType
 	mainCharacter->GetController()->GetPlayerViewPoint(Loc, Rot);	 
 
 	/**Get ground Z location*/
-		// Define the X, Y var
+	// Define the X, Y var
 	FVector2D GroundXY;
-	// Get the X, Y of the line trace
+	// Get the X, Y of the passed in Loc
 	GroundXY = FVector2D(Loc.X, Loc.Y);
-	// Get the ground (Z) location under the line trace impact point
+	// Get the ground (Z) location from the X,Y
 	GroundLoc = GetSurface(GroundXY, false);
-
-	FVector SpawnLoc = FVector(Loc.X, Loc.Y, GroundLoc);
-	 
-	FActorSpawnParameters SpawnInfo;
+	// New spawn location according to the ground (Z) height found
+	FVector SpawnLoc = FVector(Loc.X, Loc.Y, GroundLoc);		
 	 
 	// Reference to the crop pickup item blueprint
-	ACropPickupItem* PItem = Cast<ACropPickupItem>(CropPickupBlueprint.GetDefaultObject());
-	 
-	// Get a random number of crops to spawn
+	ACropPickupItem* PItem = Cast<ACropPickupItem>(CropPickupBlueprint.GetDefaultObject());	 
+	// Get a random number of crops to spawn - These values come from whatever is set in the blueprint
 	int RandomInt = FMath::RandRange(PItem->MinSpawnNum, PItem->MaxSpawnNum);
 	 
-	// TODO: Remove for prod - Just a log saying how many items were spawned
+	// TODO: REMOVE for prod - Just a log saying how many items were spawned
 	FString IntAsString = FString::FromInt(RandomInt);
 	UE_LOG(LogTemp, Warning, TEXT("Spawning %s items for pickup"), *IntAsString);
 	 
 	 // Loop that spawns the random number of items
 	for (int i = 0; i < RandomInt; i++)
-	{
-		//FMath::RandInit(2);		 
-		int RandomX = FMath::RandRange(PItem->MinXSpawnNum, PItem->MaxXSpawnNum);
-		//FMath::RandInit(77);
-		int RandomY = FMath::RandRange(PItem->MinYSpawnNum, PItem->MaxYSpawnNum);
-
-		FString IntAsString2 = FString::FromInt(RandomX);
-		FString IntAsString3 = FString::FromInt(RandomY);
-		UE_LOG(LogTemp, Warning, TEXT("Random range X: %s Random Range Y: %s"), *IntAsString2, *IntAsString3);
-		 
-
+	{		 		 
+		int RandomX = FMath::RandRange(PItem->MinXSpawnNum, PItem->MaxXSpawnNum);		 
+		int RandomY = FMath::RandRange(PItem->MinYSpawnNum, PItem->MaxYSpawnNum);			 
+		// Random spawn location in range
 		SpawnLoc.X = SpawnLoc.X + RandomX;
 		SpawnLoc.Y = SpawnLoc.Y + RandomY;
 
+		// TODO: REMOVE ME - For info only during dev
+		FString IntAsString2 = FString::FromInt(RandomX);
+		FString IntAsString3 = FString::FromInt(RandomY);
+		UE_LOG(LogTemp, Warning, TEXT("Random range X: %s Random Range Y: %s"), *IntAsString2, *IntAsString3);
 
+		FActorSpawnParameters SpawnInfo;
 		// Spawn item and define crop type
 		PickupItem = GetWorld()->SpawnActor<ACropPickupItem>(CropPickupBlueprint, SpawnLoc, Rot, SpawnInfo);
 		if (PickupItem)
