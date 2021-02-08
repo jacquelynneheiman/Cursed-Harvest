@@ -57,7 +57,29 @@ public:
 		float TraceDistance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+<<<<<<< Updated upstream
 		bool bDrawPlantingDebugLine;			
+=======
+		bool bDrawPlantingDebugLine;
+
+	// Particle System for plant and growth stages
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FX")
+		class UParticleSystem* PlantParticleSystem;
+
+	// Audio component that handles the sound being played
+	UPROPERTY()
+		class UAudioComponent* AudioComp;
+
+	// Sound for plant and growth stages
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FX")
+		class USoundCue* PlantSuccessSound;
+
+	// Sound for plant and growth stages
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FX")
+		class USoundCue* PlantFailSound;
+
+			
+>>>>>>> Stashed changes
 
 	UPROPERTY()
 	AMainCharacter* mainCharacter;

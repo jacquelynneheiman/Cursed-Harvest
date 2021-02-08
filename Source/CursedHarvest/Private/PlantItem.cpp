@@ -7,10 +7,14 @@
 #include "AC_PlayerInteraction.h"
 #include "Timermanager.h"
 
+
 APlantItem::APlantItem()
 {
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("/Game/StarterContent/Props/SM_Bush"));
-	MyMesh->SetStaticMesh(MeshAsset.Object);
+	MyMesh->SetStaticMesh(MeshAsset.Object);	
+
+	
+
 
 	MainCharRef = nullptr;
 	
@@ -23,6 +27,8 @@ APlantItem::APlantItem()
 void APlantItem::BeginPlay()
 {
 	Super::BeginPlay();
+
+	
 }
 
 void APlantItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

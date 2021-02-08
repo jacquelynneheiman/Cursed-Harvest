@@ -11,6 +11,10 @@
 #include "MainPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/UnrealMathUtility.h"
+#include "Particles/ParticleSystem.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 ECropType CropType;
 
@@ -28,6 +32,11 @@ UAC_PlayerInteraction::UAC_PlayerInteraction()
 	{
 		CropPickupBlueprint = bpClassFinderPickup.Object;
 	}
+
+	AudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComp"));
+	//AudioComp->AutoAttachParent = RootComponent;
+	AudioComp->bAutoActivate = false;
+	AudioComp->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	
 	bPlantIsOverlapped = false;
 	bHasSeed = false;
@@ -178,18 +187,53 @@ void UAC_PlayerInteraction::CheckCanPlant(FVector_NetQuantize loc, FRotator rot)
 				// Is the found plant too close to where we want to plant a new seed?
 				if (dist > PlantMinDistance)
 				{
-					TryToPlant(loc, rot);					
+					TryToPlant(loc, rot);		
+					
+					// Attach sound cue to the SoundComponent
+					if (PlantSuccessSound->IsValidLowLevelFast())
+					{
+						AudioComp->SetSound(PlantSuccessSound);
+					}
+					// Play the sound
+					AudioComp->Play();
+
+					// Spawn planting particle system
+					if (PlantParticleSystem)
+					{
+						UGameplayStatics::SpawnEmitterAtLocation(this, PlantParticleSystem, loc, rot);
+					}
 				}
 				else
 				{
 					// TODO: Need proper on-screen UI message here.
 					UE_LOG(LogTemp, Warning, TEXT("Too close to another plant! Please try again further away."));
+					// Attach sound cue to the SoundComponent
+					if (PlantFailSound->IsValidLowLevelFast())
+					{
+						AudioComp->SetSound(PlantFailSound);
+					}
+					// Play the sound
+					AudioComp->Play();
 				}
 			}
 		}
 		else
 		{
 			TryToPlant(loc, rot);
+
+			// Attach sound cue to the SoundComponent
+			if (PlantSuccessSound->IsValidLowLevelFast())
+			{
+				AudioComp->SetSound(PlantSuccessSound);
+			}
+			// Play the sound
+			AudioComp->Play();
+
+			// Spawn planting particle system
+			if (PlantParticleSystem)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(this, PlantParticleSystem, loc, rot);
+			}
 		}		
 	}
 	else
@@ -218,6 +262,8 @@ void UAC_PlayerInteraction::TryToPlant(FVector_NetQuantize loc, FRotator rot)
 	// Plant seed according to seed crop type
 	Plant->PlotStatus = EPlotStatus::Plowed;
 	Plant->InteractWithPlant();	
+
+	
 }
 
 // TODO: Change "AMainCharacter* mainChar" to enemy location - Call this function BEFORE destroying the enemy actor when the player kills it. 
