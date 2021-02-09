@@ -78,8 +78,10 @@ public:
 
 	UFUNCTION()
 	void TransitionToRipe();
-
 	 
 	UFUNCTION()
 	void SetMesh(FString MeshPath);
+
+	UFUNCTION()
+	TEnumAsByte<ECropType> GetCropType();
 };

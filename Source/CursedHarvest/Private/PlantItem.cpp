@@ -120,7 +120,7 @@ void APlantItem::InteractWithPlant()
 			UE_LOG(LogTemp, Warning, TEXT("PlantItem: Your %s is fully grown and has turned into a monster and run off! Catch and kill it to harvest it!"), *ItemStr);
 			
 			// Spawn combat plant
-			//CombatSystem->SpawnEnemy(cropType);
+			//CombatSystem->SpawnEnemy(CropType);
 
 			// Destroy plant actor
 			this->Destroy();			 
@@ -181,5 +181,10 @@ void APlantItem::SetMesh(FString MeshPath)
 {	 
 	MeshToUse = Cast<UStaticMesh>(StaticLoadObject(UStaticMesh::StaticClass(), NULL, *MeshPath));
 	MyMesh->SetStaticMesh(MeshToUse);
+}
+
+TEnumAsByte<ECropType> APlantItem::GetCropType()
+{
+	return CropType;
 }
 

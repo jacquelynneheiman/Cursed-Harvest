@@ -197,11 +197,11 @@ void UAC_PlayerInteraction::CheckCanPlant(FVector_NetQuantize loc, FRotator rot)
 					// Play the sound
 					AudioComp->Play();
 
-					// Spawn planting particle system
-					if (PlantParticleSystem)
-					{
-						UGameplayStatics::SpawnEmitterAtLocation(this, PlantParticleSystem, loc, rot);
-					}
+					// Determine which particle system to use
+					UParticleSystem* FoundParticleSystem = GetParticleSystemToSpawn(CropType);
+					// Spawn the particles at the new plants location
+					SpawnParticleSystem(FoundParticleSystem, loc, rot);
+					 
 				}
 				else
 				{
@@ -229,11 +229,10 @@ void UAC_PlayerInteraction::CheckCanPlant(FVector_NetQuantize loc, FRotator rot)
 			// Play the sound
 			AudioComp->Play();
 
-			// Spawn planting particle system
-			if (PlantParticleSystem)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation(this, PlantParticleSystem, loc, rot);
-			}
+			// Determine which particle system to use
+			UParticleSystem* FoundParticleSystem = GetParticleSystemToSpawn(CropType);
+			// Spawn the particles at the new plants location
+			SpawnParticleSystem(FoundParticleSystem, loc, rot);
 		}		
 	}
 	else
@@ -261,9 +260,7 @@ void UAC_PlayerInteraction::TryToPlant(FVector_NetQuantize loc, FRotator rot)
 
 	// Plant seed according to seed crop type
 	Plant->PlotStatus = EPlotStatus::Plowed;
-	Plant->InteractWithPlant();	
-
-	
+	Plant->InteractWithPlant();		
 }
 
 // TODO: Change "AMainCharacter* mainChar" to enemy location - Call this function BEFORE destroying the enemy actor when the player kills it. 
@@ -317,4 +314,47 @@ void UAC_PlayerInteraction::SpawnPickupItems(AMainCharacter* mainChar, ECropType
 			PickupItem->CropType = cropType;
 		}		
 	}	
+}
+
+UParticleSystem* UAC_PlayerInteraction::GetParticleSystemToSpawn(ECropType CropTypeToSpawn)
+{
+	switch (CropTypeToSpawn)
+	{
+	case None:
+	{
+		// empty				 
+	}
+	break;
+	case Cabbage:
+	{
+		return PlantParticleSystemS1;
+	}
+	break;
+	case Strawberry:
+	{
+		return PlantParticleSystemS2;
+	}
+	break;
+	case Watermelon:
+	{
+		return PlantParticleSystemS3;
+	}
+	break;
+	case Corn:
+	{
+		return PlantParticleSystemS4;
+	}
+	break;
+	}
+	// Default return C1
+	return PlantParticleSystemS1;
+}
+
+void UAC_PlayerInteraction::SpawnParticleSystem(UParticleSystem* ParticleSystem, FVector Location, FRotator Rotation)
+{
+	// Spawn planting particle system
+	if (PlantParticleSystemS1)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(this, ParticleSystem, Location, Rotation);
+	}
 }
