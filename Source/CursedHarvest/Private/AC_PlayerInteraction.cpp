@@ -11,6 +11,10 @@
 #include "MainPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/UnrealMathUtility.h"
+#include "Particles/ParticleSystem.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 ECropType CropType;
 
@@ -28,6 +32,11 @@ UAC_PlayerInteraction::UAC_PlayerInteraction()
 	{
 		CropPickupBlueprint = bpClassFinderPickup.Object;
 	}
+
+	AudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComp"));
+	//AudioComp->AutoAttachParent = RootComponent;
+	AudioComp->bAutoActivate = false;
+	AudioComp->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	
 	bPlantIsOverlapped = false;
 	bHasSeed = false;
@@ -48,6 +57,7 @@ void UAC_PlayerInteraction::DisplayCropTypeUponPickup(TEnumAsByte<ECropType> pic
 // Called from PlantItem
 void UAC_PlayerInteraction::SetPlantOverlapStatus(APlantItem* plantActor, bool overlapStatus)
 {
+	// TODO: This is redundant, see if the if/else can be removed
 	if (plantActor)
 	{
 		OverlappedPlantActor = plantActor;
@@ -63,29 +73,13 @@ void UAC_PlayerInteraction::SetPlantOverlapStatus(APlantItem* plantActor, bool o
 }
 
 void UAC_PlayerInteraction::CheckForValidPlantSpot(AMainCharacter* mainChar)
-{
-	
+{	
 	FVector Loc;
 	FRotator Rot;
 	//FHitResult Hit;
 	// Get player location and rotation
 	mainCharacter = Cast<AMainCharacter>(mainChar);
-	mainCharacter->GetController()->GetPlayerViewPoint(Loc, Rot);
-	//FVector Start = Loc;
-	//FVector End = Start + (Rot.Vector() * TraceDistance);
-
-	// Line trace
-	/*FCollisionQueryParams TraceParams;
-	bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, TraceParams);*/
-
-	/*if (bDrawPlantingDebugLine)
-	{
-		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 3.0f);
-	}*/
-
-	// Did hit anything?  
-	/*if (bHit)
-	{*/
+	mainCharacter->GetController()->GetPlayerViewPoint(Loc, Rot);	
 
 	bool bPlantLoc;
 	FHitResult HitResult;
@@ -105,32 +99,22 @@ void UAC_PlayerInteraction::CheckForValidPlantSpot(AMainCharacter* mainChar)
 		if (GroundLoc + GroundVariationAllowance > HitResult.ImpactPoint.Z && GroundLoc - GroundVariationAllowance < HitResult.ImpactPoint.Z)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Can plant on this surface."));
-			FVector_NetQuantize PlantLoc;
-			//PlantLoc = Hit.ImpactPoint;
-
-			// TEST
+			FVector_NetQuantize PlantLoc;			
 			
-				UE_LOG(LogTemp, Warning, TEXT("Hit location = %s"), *HitResult.ImpactPoint.ToString());
-				PlantLoc = HitResult.ImpactPoint;
-				CheckCanPlant(PlantLoc, Rot);
-				// TODO: Remove below for prod
-				DrawDebugBox(GetWorld(), HitResult.ImpactPoint, FVector(25, 25, 25), FColor::Emerald, false, 3.f);
-			 
-			// END TEST
-
-			// See if player meets requirements to plant a seed
-			//CheckCanPlant(PlantLoc, Rot); 
+			UE_LOG(LogTemp, Warning, TEXT("Hit location = %s"), *HitResult.ImpactPoint.ToString());
+			PlantLoc = HitResult.ImpactPoint;
+			CheckCanPlant(PlantLoc, Rot);
+			// TODO: Remove below for prod
+			DrawDebugBox(GetWorld(), HitResult.ImpactPoint, FVector(25, 25, 25), FColor::Emerald, false, 3.f);			  
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("CAN'T PLANT HERE"));
-		}
-		//UE_LOG(LogTemp, Warning, TEXT("Ground location Z(height): %f"), GroundLoc);
-	//}
+		}		 
 	}
 }
 
-// Gets the ground location at X,Y - Used for Determining the location to plant a seed
+// Gets the ground (Z) location at X,Y - Used for Determining the location to plant a seed
 float UAC_PlayerInteraction::GetSurface(FVector2D Point, bool bDrawDebugLines)
 {
 	UWorld* World{ this->GetWorld() };
@@ -203,18 +187,52 @@ void UAC_PlayerInteraction::CheckCanPlant(FVector_NetQuantize loc, FRotator rot)
 				// Is the found plant too close to where we want to plant a new seed?
 				if (dist > PlantMinDistance)
 				{
-					TryToPlant(loc, rot);					
+					TryToPlant(loc, rot);		
+					
+					// Attach sound cue to the SoundComponent
+					if (PlantSuccessSound->IsValidLowLevelFast())
+					{
+						AudioComp->SetSound(PlantSuccessSound);
+					}
+					// Play the sound
+					AudioComp->Play();
+
+					// Determine which particle system to use
+					UParticleSystem* FoundParticleSystem = GetParticleSystemToSpawn(CropType);
+					// Spawn the particles at the new plants location
+					SpawnParticleSystem(FoundParticleSystem, loc, rot);
+					 
 				}
 				else
 				{
 					// TODO: Need proper on-screen UI message here.
 					UE_LOG(LogTemp, Warning, TEXT("Too close to another plant! Please try again further away."));
+					// Attach sound cue to the SoundComponent
+					if (PlantFailSound->IsValidLowLevelFast())
+					{
+						AudioComp->SetSound(PlantFailSound);
+					}
+					// Play the sound
+					AudioComp->Play();
 				}
 			}
 		}
 		else
 		{
 			TryToPlant(loc, rot);
+
+			// Attach sound cue to the SoundComponent
+			if (PlantSuccessSound->IsValidLowLevelFast())
+			{
+				AudioComp->SetSound(PlantSuccessSound);
+			}
+			// Play the sound
+			AudioComp->Play();
+
+			// Determine which particle system to use
+			UParticleSystem* FoundParticleSystem = GetParticleSystemToSpawn(CropType);
+			// Spawn the particles at the new plants location
+			SpawnParticleSystem(FoundParticleSystem, loc, rot);
 		}		
 	}
 	else
@@ -242,7 +260,7 @@ void UAC_PlayerInteraction::TryToPlant(FVector_NetQuantize loc, FRotator rot)
 
 	// Plant seed according to seed crop type
 	Plant->PlotStatus = EPlotStatus::Plowed;
-	Plant->InteractWithPlant();	
+	Plant->InteractWithPlant();		
 }
 
 // TODO: Change "AMainCharacter* mainChar" to enemy location - Call this function BEFORE destroying the enemy actor when the player kills it. 
@@ -256,44 +274,39 @@ void UAC_PlayerInteraction::SpawnPickupItems(AMainCharacter* mainChar, ECropType
 	mainCharacter->GetController()->GetPlayerViewPoint(Loc, Rot);	 
 
 	/**Get ground Z location*/
-		// Define the X, Y var
+	// Define the X, Y var
 	FVector2D GroundXY;
-	// Get the X, Y of the line trace
+	// Get the X, Y of the passed in Loc
 	GroundXY = FVector2D(Loc.X, Loc.Y);
-	// Get the ground (Z) location under the line trace impact point
+	// Get the ground (Z) location from the X,Y
 	GroundLoc = GetSurface(GroundXY, false);
-
-	FVector SpawnLoc = FVector(Loc.X, Loc.Y, GroundLoc);
-	 
-	FActorSpawnParameters SpawnInfo;
+	// New spawn location according to the ground (Z) height found
+	FVector SpawnLoc = FVector(Loc.X, Loc.Y, GroundLoc);		
 	 
 	// Reference to the crop pickup item blueprint
-	ACropPickupItem* PItem = Cast<ACropPickupItem>(CropPickupBlueprint.GetDefaultObject());
-	 
-	// Get a random number of crops to spawn
+	ACropPickupItem* PItem = Cast<ACropPickupItem>(CropPickupBlueprint.GetDefaultObject());	 
+	// Get a random number of crops to spawn - These values come from whatever is set in the blueprint
 	int RandomInt = FMath::RandRange(PItem->MinSpawnNum, PItem->MaxSpawnNum);
 	 
-	// TODO: Remove for prod - Just a log saying how many items were spawned
+	// TODO: REMOVE for prod - Just a log saying how many items were spawned
 	FString IntAsString = FString::FromInt(RandomInt);
 	UE_LOG(LogTemp, Warning, TEXT("Spawning %s items for pickup"), *IntAsString);
 	 
 	 // Loop that spawns the random number of items
 	for (int i = 0; i < RandomInt; i++)
-	{
-		//FMath::RandInit(2);		 
-		int RandomX = FMath::RandRange(PItem->MinXSpawnNum, PItem->MaxXSpawnNum);
-		//FMath::RandInit(77);
-		int RandomY = FMath::RandRange(PItem->MinYSpawnNum, PItem->MaxYSpawnNum);
-
-		FString IntAsString2 = FString::FromInt(RandomX);
-		FString IntAsString3 = FString::FromInt(RandomY);
-		UE_LOG(LogTemp, Warning, TEXT("Random range X: %s Random Range Y: %s"), *IntAsString2, *IntAsString3);
-		 
-
+	{		 		 
+		int RandomX = FMath::RandRange(PItem->MinXSpawnNum, PItem->MaxXSpawnNum);		 
+		int RandomY = FMath::RandRange(PItem->MinYSpawnNum, PItem->MaxYSpawnNum);			 
+		// Random spawn location in range
 		SpawnLoc.X = SpawnLoc.X + RandomX;
 		SpawnLoc.Y = SpawnLoc.Y + RandomY;
 
+		// TODO: REMOVE ME - For info only during dev
+		FString IntAsString2 = FString::FromInt(RandomX);
+		FString IntAsString3 = FString::FromInt(RandomY);
+		UE_LOG(LogTemp, Warning, TEXT("Random range X: %s Random Range Y: %s"), *IntAsString2, *IntAsString3);
 
+		FActorSpawnParameters SpawnInfo;
 		// Spawn item and define crop type
 		PickupItem = GetWorld()->SpawnActor<ACropPickupItem>(CropPickupBlueprint, SpawnLoc, Rot, SpawnInfo);
 		if (PickupItem)
@@ -301,4 +314,47 @@ void UAC_PlayerInteraction::SpawnPickupItems(AMainCharacter* mainChar, ECropType
 			PickupItem->CropType = cropType;
 		}		
 	}	
+}
+
+UParticleSystem* UAC_PlayerInteraction::GetParticleSystemToSpawn(ECropType CropTypeToSpawn)
+{
+	switch (CropTypeToSpawn)
+	{
+	case None:
+	{
+		// empty				 
+	}
+	break;
+	case Cabbage:
+	{
+		return PlantParticleSystemS1;
+	}
+	break;
+	case Strawberry:
+	{
+		return PlantParticleSystemS2;
+	}
+	break;
+	case Watermelon:
+	{
+		return PlantParticleSystemS3;
+	}
+	break;
+	case Corn:
+	{
+		return PlantParticleSystemS4;
+	}
+	break;
+	}
+	// Default return C1
+	return PlantParticleSystemS1;
+}
+
+void UAC_PlayerInteraction::SpawnParticleSystem(UParticleSystem* ParticleSystem, FVector Location, FRotator Rotation)
+{
+	// Spawn planting particle system
+	if (PlantParticleSystemS1)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(this, ParticleSystem, Location, Rotation);
+	}
 }

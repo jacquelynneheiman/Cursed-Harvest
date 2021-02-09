@@ -52,6 +52,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Plant Timers")
 	float RipeTransitionLength;
 
+	
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -76,8 +78,10 @@ public:
 
 	UFUNCTION()
 	void TransitionToRipe();
-
 	 
 	UFUNCTION()
 	void SetMesh(FString MeshPath);
+
+	UFUNCTION()
+	TEnumAsByte<ECropType> GetCropType();
 };
