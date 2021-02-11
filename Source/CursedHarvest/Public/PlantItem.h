@@ -44,13 +44,29 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Plant Timers")
 	float SproutTransitionLength;
 
+	/** Seedling to Sprout timer modifier - under 1.0 = faster, over 1.0 = slower 
+	Possible uses - better quality tools can dig deeper or prepare lesser quality ground,
+	making plant grow faster and vice-versa*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Plant Timers")
+	float SeedlingToSproutTimerModifier;
+
 	// Sprout lifetime before transitioning to Ripening
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Plant Timers")
 	float RipeningTransitionLength;
 
+	/** Sprout to ripening timer modifier - under 1.0 = faster, over 1.0 = slower
+	Possible uses - better quality fertilizer making plant grow faster and vice-versa*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Plant Timers")
+	float SproutToRipeningTimerModifier;
+
 	// Sprout lifetime before transitioning to Ripe
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Plant Timers")
 	float RipeTransitionLength;
+
+	/** Ripening to ripe timer modifier - under 1.0 = faster, over 1.0 = slower
+	Possible uses - player pulls weeds which makes plant grow faster and vice-versa*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Plant Timers")
+		float RipeningToRipeTimerModifier;
 
 	
 

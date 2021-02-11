@@ -13,15 +13,16 @@ APlantItem::APlantItem()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("/Game/StarterContent/Props/SM_Bush"));
 	MyMesh->SetStaticMesh(MeshAsset.Object);	
 
-	
-
-
 	MainCharRef = nullptr;
 	
 	PlowTimerLength = 2.f;
 	SproutTransitionLength = 2.f;
 	RipeningTransitionLength = 2.f;
 	RipeTransitionLength = 2.f;	 
+
+	SeedlingToSproutTimerModifier = 1.0f;
+	SproutToRipeningTimerModifier = 1.0f;
+	RipeningToRipeTimerModifier = 1.0f;
 }
 
 void APlantItem::BeginPlay()
@@ -85,7 +86,8 @@ void APlantItem::InteractWithPlant()
 			// TODO: This is just to show a growth scale until actual meshes are available for each growth stage
 			MyMesh->SetWorldScale3D(FVector(0.2f, 0.2f, 0.2f));
 			UE_LOG(LogTemp, Warning, TEXT("Seedling planted"));		
-			GetWorld()->GetTimerManager().SetTimer(SeedlingToSproutTimer, this, &APlantItem::TransitionToSprout, SproutTransitionLength, false);
+			float TimerLength = SproutTransitionLength * SeedlingToSproutTimerModifier;
+			GetWorld()->GetTimerManager().SetTimer(SeedlingToSproutTimer, this, &APlantItem::TransitionToSprout, TimerLength, false);
 		}
 		break;
 		case Sprout:
@@ -96,8 +98,9 @@ void APlantItem::InteractWithPlant()
 			SetMesh(MPath);
 			 
 			// TODO: This is just to show a growth scale until actual meshes are available for each growth stage
-			MyMesh->SetWorldScale3D(FVector(0.4f, 0.4f, 0.4f));		
-			GetWorld()->GetTimerManager().SetTimer(SproutToRipeningTimer, this, &APlantItem::TransitionToRipening, RipeningTransitionLength, false);
+			MyMesh->SetWorldScale3D(FVector(0.4f, 0.4f, 0.4f));	
+			float TimerLength = RipeningTransitionLength * SproutToRipeningTimerModifier;
+			GetWorld()->GetTimerManager().SetTimer(SproutToRipeningTimer, this, &APlantItem::TransitionToRipening, TimerLength, false);
 		}
 		break;
 		case Ripening:
@@ -109,7 +112,8 @@ void APlantItem::InteractWithPlant()
 			 
 			// TODO: This is just to show a growth scale until actual meshes are available for each growth stage
 			MyMesh->SetWorldScale3D(FVector(0.7f, 0.7f, 0.7f));
-			GetWorld()->GetTimerManager().SetTimer(RipeningToRipeTimer, this, &APlantItem::TransitionToRipe, RipeTransitionLength, false);
+			float TimerLength = RipeTransitionLength * RipeningToRipeTimerModifier;
+			GetWorld()->GetTimerManager().SetTimer(RipeningToRipeTimer, this, &APlantItem::TransitionToRipe, TimerLength, false);
 		}
 		break;
 		case Ripe:

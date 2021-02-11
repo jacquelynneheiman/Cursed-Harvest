@@ -40,9 +40,10 @@ UAC_PlayerInteraction::UAC_PlayerInteraction()
 	
 	bPlantIsOverlapped = false;
 	bHasSeed = false;
-	PlantMinDistance = 300.f;
+	PlantMinDistance = 200.f;
 	GroundVariationAllowance = 10.f;
 	TraceDistance = 2000.f;	 
+	 
 }
 
 void UAC_PlayerInteraction::DisplayCropTypeUponPickup(TEnumAsByte<ECropType> pickup)
@@ -174,8 +175,7 @@ void UAC_PlayerInteraction::CheckCanPlant(FVector_NetQuantize loc, FRotator rot)
 		TArray<AActor*> FoundPlants;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlantItem::StaticClass(), FoundPlants);
 
-		// Was more than 1 plant found?
-		if (FoundPlants.Num() > 1)
+		if (FoundPlants.Num() > 0)
 		{
 			for (AActor* FoundPlant : FoundPlants)
 			{
@@ -186,9 +186,9 @@ void UAC_PlayerInteraction::CheckCanPlant(FVector_NetQuantize loc, FRotator rot)
 				dist = (PlantLoc - loc).Size();
 				// Is the found plant too close to where we want to plant a new seed?
 				if (dist > PlantMinDistance)
-				{
-					TryToPlant(loc, rot);		
-					
+				{					 
+					PlantSeed(loc, rot);
+					 
 					// Attach sound cue to the SoundComponent
 					if (PlantSuccessSound->IsValidLowLevelFast())
 					{
@@ -201,10 +201,9 @@ void UAC_PlayerInteraction::CheckCanPlant(FVector_NetQuantize loc, FRotator rot)
 					UParticleSystem* FoundParticleSystem = GetParticleSystemToSpawn(CropType);
 					// Spawn the particles at the new plants location
 					SpawnParticleSystem(FoundParticleSystem, loc, rot);
-					 
 				}
 				else
-				{
+				{					 
 					// TODO: Need proper on-screen UI message here.
 					UE_LOG(LogTemp, Warning, TEXT("Too close to another plant! Please try again further away."));
 					// Attach sound cue to the SoundComponent
@@ -219,8 +218,8 @@ void UAC_PlayerInteraction::CheckCanPlant(FVector_NetQuantize loc, FRotator rot)
 		}
 		else
 		{
-			TryToPlant(loc, rot);
-
+			PlantSeed(loc, rot);
+			 
 			// Attach sound cue to the SoundComponent
 			if (PlantSuccessSound->IsValidLowLevelFast())
 			{
@@ -233,7 +232,8 @@ void UAC_PlayerInteraction::CheckCanPlant(FVector_NetQuantize loc, FRotator rot)
 			UParticleSystem* FoundParticleSystem = GetParticleSystemToSpawn(CropType);
 			// Spawn the particles at the new plants location
 			SpawnParticleSystem(FoundParticleSystem, loc, rot);
-		}		
+		}
+		
 	}
 	else
 	{
@@ -242,7 +242,7 @@ void UAC_PlayerInteraction::CheckCanPlant(FVector_NetQuantize loc, FRotator rot)
 	}
 }
 
-void UAC_PlayerInteraction::TryToPlant(FVector_NetQuantize loc, FRotator rot)
+void UAC_PlayerInteraction::PlantSeed(FVector_NetQuantize loc, FRotator rot)
 {	
 	UE_LOG(LogTemp, Warning, TEXT("Ok to spawn."));
 	UE_LOG(LogTemp, Warning, TEXT("Has seed, spawning the plant (hidden) setting plotenum to plowed to begin the plowing animation."));

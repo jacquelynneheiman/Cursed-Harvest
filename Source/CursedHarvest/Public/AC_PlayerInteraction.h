@@ -40,6 +40,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Planting")
 		float GroundVariationAllowance;
 
+	 
+
 	// Reference to the blueprint - Using blueprint here allows spawning of the BP, so the designer can change parameters as required.
 	UPROPERTY(BlueprintReadOnly, Category = "Pickup")
 		TSubclassOf<class ACropPickupItem> CropPickupBlueprint;
@@ -114,7 +116,7 @@ public:
 	void CheckCanPlant(FVector_NetQuantize loc, FRotator rot);
 
 	UFUNCTION()
-	void TryToPlant(FVector_NetQuantize loc, FRotator rot);
+	void PlantSeed(FVector_NetQuantize loc, FRotator rot);
 
 	UFUNCTION()
 	void SpawnPickupItems(AMainCharacter* mainChar, ECropType cropType);
