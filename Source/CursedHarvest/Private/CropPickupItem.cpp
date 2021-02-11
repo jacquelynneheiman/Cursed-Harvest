@@ -40,6 +40,7 @@ void ACropPickupItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 		// Pass croptype to MainCharacter and add to inventory
 		MainCharacter->InteractionComp->DisplayCropTypeUponPickup(ItemCropType); // TODO: Remove me before prod. Was just for proof of concept
 		//MainCharacter->InventoryComp->AddToInventory(itemCropType, Qty); 
+		MainCharacter->AddItemToInventory();
 
 		// Call parent function OnBeginOverlap to destroy the pickup item
 		Super::OnOverlapBegin(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
