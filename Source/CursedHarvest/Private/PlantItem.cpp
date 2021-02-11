@@ -13,9 +13,6 @@ APlantItem::APlantItem()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("/Game/StarterContent/Props/SM_Bush"));
 	MyMesh->SetStaticMesh(MeshAsset.Object);	
 
-	
-
-
 	MainCharRef = nullptr;
 	
 	PlowTimerLength = 2.f;
@@ -26,9 +23,7 @@ APlantItem::APlantItem()
 
 void APlantItem::BeginPlay()
 {
-	Super::BeginPlay();
-
-	
+	Super::BeginPlay();	
 }
 
 void APlantItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
