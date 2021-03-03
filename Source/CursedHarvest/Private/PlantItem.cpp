@@ -7,11 +7,10 @@
 #include "AC_PlayerInteraction.h"
 #include "Timermanager.h"
 
-
 APlantItem::APlantItem()
 {
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("/Game/StarterContent/Props/SM_Bush"));
-	MyMesh->SetStaticMesh(MeshAsset.Object);	
+	MyMesh->SetStaticMesh(MeshAsset.Object);
 
 	MainCharRef = nullptr;
 	
@@ -23,7 +22,7 @@ APlantItem::APlantItem()
 
 void APlantItem::BeginPlay()
 {
-	Super::BeginPlay();	
+	Super::BeginPlay();
 }
 
 void APlantItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -115,7 +114,7 @@ void APlantItem::InteractWithPlant()
 			UE_LOG(LogTemp, Warning, TEXT("PlantItem: Your %s is fully grown and has turned into a monster and run off! Catch and kill it to harvest it!"), *ItemStr);
 			
 			// Spawn combat plant
-			//CombatSystem->SpawnEnemy(CropType);
+			//CombatSystem->SpawnEnemy(cropType);
 
 			// Destroy plant actor
 			this->Destroy();			 
@@ -176,10 +175,5 @@ void APlantItem::SetMesh(FString MeshPath)
 {	 
 	MeshToUse = Cast<UStaticMesh>(StaticLoadObject(UStaticMesh::StaticClass(), NULL, *MeshPath));
 	MyMesh->SetStaticMesh(MeshToUse);
-}
-
-TEnumAsByte<ECropType> APlantItem::GetCropType()
-{
-	return CropType;
 }
 

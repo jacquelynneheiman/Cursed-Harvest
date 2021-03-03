@@ -45,7 +45,8 @@ public:
 		TSubclassOf<class ACropPickupItem> CropPickupBlueprint;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Pickup")
-		class ACropPickupItem* PickupItem;	  
+		class ACropPickupItem* PickupItem;
+	  
 
 	UPROPERTY(BlueprintReadOnly, Category = "Interaction")
 		bool bPlantIsOverlapped;
@@ -57,38 +58,8 @@ public:
 		float TraceDistance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
- 
-		bool bDrawPlantingDebugLine;			
-  
-	// Particle System for plant and growth stages, seed type 1
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX | Crop planting particles")
-		class UParticleSystem* PlantParticleSystemS1;
-	// Particle System for plant and growth stages, seed type 2
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX | Crop planting particles")
-		UParticleSystem* PlantParticleSystemS2;
-	// Particle System for plant and growth stages, seed type 3
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX | Crop planting particles")
-		UParticleSystem* PlantParticleSystemS3;
-	// Particle System for plant and growth stages, seed type 4
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX | Crop planting particles")
-		UParticleSystem* PlantParticleSystemS4;
-
-	// Particle System for plant and growth stages
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FX")
-	TArray<UParticleSystem*> PlantParticleSystems;*/
-
-	// Audio component that handles the sound being played
-	UPROPERTY()
-		class UAudioComponent* AudioComp;
-
-	// Sound for plant and growth stages
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SFX")
-		class USoundCue* PlantSuccessSound;
-
-	// Sound for plant and growth stages
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SFX")
-		class USoundCue* PlantFailSound;	
- 
+		bool bDrawPlantingDebugLine;
+			
 
 	UPROPERTY()
 	AMainCharacter* mainCharacter;
@@ -118,12 +89,4 @@ public:
 
 	UFUNCTION()
 	void SpawnPickupItems(AMainCharacter* mainChar, ECropType cropType);
-
-	UFUNCTION()
-		UParticleSystem* GetParticleSystemToSpawn(ECropType CropTypeToSpawn);
-
-	UFUNCTION()
-	void SpawnParticleSystem(UParticleSystem* ParticleSystem, FVector Location, FRotator Rotation);
-
-	
 };

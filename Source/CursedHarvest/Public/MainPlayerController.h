@@ -12,44 +12,9 @@
 UCLASS()
 class CURSEDHARVEST_API AMainPlayerController : public APlayerController
 {
-	GENERATED_BODY() 
-
+	GENERATED_BODY()
 	
-public:
-	/** Reference to the UMG asset in the editor */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
-		TSubclassOf<class UUserWidget> HUDOverlayAsset;
-
-	/** Variable to hold the widget after creating it */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
-		UUserWidget* HUDOverlay;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
-		TSubclassOf<UUserWidget> WInventory;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Widgets")
-		UUserWidget* Inventory;
-
-	bool bInventoryVisible;
-
-
-protected:
-
-	virtual void BeginPlay() override;
-
-
-public:
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
-		void DisplayInventory();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
-		void HideInventory();
-
-	void ToggleInventory();
-
-	UFUNCTION(BlueprintCallable)
-	UUserWidget* GetInventory();
+ 
 
 	
 };

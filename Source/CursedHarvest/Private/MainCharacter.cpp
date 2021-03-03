@@ -70,7 +70,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("LMBDown", IE_Pressed, this, &AMainCharacter::LMBDown);
 	PlayerInputComponent->BindAction("RMBDown", IE_Pressed, this, &AMainCharacter::RMBDown);
 	PlayerInputComponent->BindAction("PKey", IE_Pressed, this, &AMainCharacter::PKeyPressed);
-	PlayerInputComponent->BindAction("IKey", IE_Pressed, this, &AMainCharacter::IKeyPressed);
+
 }
 
 void AMainCharacter::RestoreCharMovement()
@@ -162,13 +162,6 @@ void AMainCharacter::PKeyPressed()
 	InteractionComp->SpawnPickupItems(this, CropType);
 }
 
-void AMainCharacter::IKeyPressed()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Pressed I Key"));
-	AMainPlayerController* MainPlayerController = Cast<AMainPlayerController>(MainPController);
-	MainPlayerController->ToggleInventory();
-}
-
 void AMainCharacter::RMBDown()
 {
 	UE_LOG(LogTemp, Warning, TEXT("RMB Down"));
@@ -237,9 +230,4 @@ void AMainCharacter::ResetCursorToDefault()
 void AMainCharacter::SetPlantingMode(bool bSetPlantingMode)
 {
 	bPlantingMode = bSetPlantingMode;
-}
-
-void AMainCharacter::AddItemToInventory_Implementation()
-{
-	// Code is in BP at this time.
 }

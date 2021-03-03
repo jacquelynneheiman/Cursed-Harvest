@@ -87,13 +87,7 @@ public:
 	UFUNCTION()
 	void PKeyPressed();
 
-	UFUNCTION()
-	void IKeyPressed();
-
 	UFUNCTION(meta = (DevelopmentOnly))
 	void SetPlantingMode(bool bSetPlantingMode);
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Inventory")
-		void AddItemToInventory();
 
 };
